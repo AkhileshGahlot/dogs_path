@@ -27,18 +27,126 @@ class HomePage extends StatefulWidget {
     // TODO: implement createState
     return _HomePageState();
   }
-
 }
 
-class _HomePageState extends State<HomePage>{
+class _HomePageState extends State<HomePage> {
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(
+          "Dog's Path",
+          style: titleTextStyle,
+        ),
+      ),
+      body: SafeArea(
+        child: Container(
+          color: backgroundColor,
+          child: PrimaryListView(),
+        ),
+      ),
+    );
+  }
+}
 
+///Vertical List View
+class PrimaryListView extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return _PrimaryListViewState();
+  }
+}
+
+class _PrimaryListViewState extends State<PrimaryListView> {
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return ListView.builder(
+      scrollDirection: Axis.vertical,
+      itemBuilder: (context, index) {
+        return null;
+      },
+    );
+  }
+}
+
+///Horizontal List View
+class SecondaryListView extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return _SecondaryListViewState();
+  }
+}
+
+class _SecondaryListViewState extends State<SecondaryListView> {
+
+  int isSelected=0;
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return null;
+    return Container(
+      color: backgroundColor,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(left:15.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                     Text("787878 Dach Crest",style: titleTextStyle,),
+                     Text("7 Sub Paths",style: smallTextStyle,),
+                  ],
+                ),
+              ),
+              RaisedButton(
+                onPressed: (){},
+                color: Colors.black,
+                child: Text('Open Path',style:buttonTextStyle,),
+              ),
+            ],
+          ),
+          ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (context,index){
+                return Image.network('');
+              }
+          ),
+          Card(
+            elevation: 4,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (context,index) {
+                return ListTile(
+                  onTap: (){},
+                    enabled: true,
+                  title: Text('Cannnnnn',
+                  style: titleTextStyle.copyWith(
+                    color: isSelected==index?titleColor:button2TextColor,
+                  ),
+                  ),
+                  trailing: Icon(Icons.arrow_forward,
+                  color: titleColor,
+                  )
+                );
+              }
+    ),
+          ),
+        ],
+      ),
+    );
   }
-
 }
 
 class Splash extends StatefulWidget {
@@ -61,7 +169,6 @@ class _SplashState extends State<Splash> {
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
       color: backgroundColor,
       child: Column(
@@ -69,7 +176,6 @@ class _SplashState extends State<Splash> {
           Spacer(
             flex: 4,
           ),
-
           Container(
             constraints: BoxConstraints(
               maxHeight: 100,
@@ -80,8 +186,8 @@ class _SplashState extends State<Splash> {
             ),
           ),
           SizedBox(
-             height: 20,
-           ),
+            height: 20,
+          ),
           Text(
             "Dog's Path",
             style: headingTextStyle,
@@ -100,11 +206,9 @@ class _SplashState extends State<Splash> {
           Spacer(
             flex: 5,
           ),
-
         ],
       ),
     );
-
   }
 }
 
@@ -118,8 +222,8 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     // TODO: implement build
 
-    final orientation=MediaQuery.of(context).orientation;
-    final width=MediaQuery.of(context).size.width;
+    final orientation = MediaQuery.of(context).orientation;
+    final width = MediaQuery.of(context).size.width;
     return Container(
       color: backgroundColor,
       child: Column(
@@ -127,40 +231,38 @@ class _LoginScreenState extends State<LoginScreen> {
           Spacer(
             flex: 4,
           ),
-
           Padding(
-            padding: const EdgeInsets.only(bottom:8.0),
-            child: Text('Sign In',
-              style: headingTextStyle.copyWith(color: Colors.white,
-                fontSize: 22
-              ),),
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              'Sign In',
+              style:
+                  headingTextStyle.copyWith(color: Colors.white, fontSize: 22),
+            ),
           ),
-
           Padding(
             padding: const EdgeInsets.all(18.0),
             child: Text(
               'Sign in with your facebook account',
-              style: titleTextStyle.copyWith(color: Colors.white,fontSize: 14),
-                textAlign: TextAlign.center,
+              style: titleTextStyle.copyWith(color: Colors.white, fontSize: 14),
+              textAlign: TextAlign.center,
             ),
           ),
-
           Container(
-            margin: orientation==Orientation.portrait?
-            EdgeInsets.symmetric(horizontal: 30)
-                :EdgeInsets.symmetric(horizontal: width*.3),
+            margin: orientation == Orientation.portrait
+                ? EdgeInsets.symmetric(horizontal: 30)
+                : EdgeInsets.symmetric(horizontal: width * .3),
             child: RaisedButton(
-              onPressed: (){
+              onPressed: () {
                 startFBLogin();
               },
-              color:  Color(0xFF3B5998),
+              color: Color(0xFF3B5998),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                 Spacer(
-                   flex: 2,
-                 ),
+                  Spacer(
+                    flex: 2,
+                  ),
                   Text(
                     'f',
                     style: TextStyle(
@@ -174,11 +276,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   Text(
                     'Sign in with Facebook',
-                    style:titleTextStyle
-                        .copyWith(fontFamily: 'LatoRegular',
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                    style: titleTextStyle.copyWith(
+                      fontFamily: 'LatoRegular',
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                   Spacer(
@@ -188,7 +290,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-
           Spacer(
             flex: 5,
           ),
@@ -197,8 +298,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-
-  void startFBLogin() async{
+  void startFBLogin() async {
     final facebookLogin = FacebookLogin();
     facebookLogin.loginBehavior = FacebookLoginBehavior.webViewOnly;
     final result = await facebookLogin.logIn(['email']);
@@ -206,37 +306,34 @@ class _LoginScreenState extends State<LoginScreen> {
     switch (result.status) {
       case FacebookLoginStatus.loggedIn:
 
-      //todo: store access token in shared preference.
+        //todo: store access token in shared preference.
 //        _sendTokenToServer(result.accessToken.token);
         _showLoggedInUI();
 
         break;
       case FacebookLoginStatus.cancelledByUser:
-      //        todo: add toast message
-      //        _showCancelledMessage();
+        //        todo: add toast message
+        //        _showCancelledMessage();
         print('User Cancele Login Process');
         break;
       case FacebookLoginStatus.error:
 //        todo: add toast message
 //        _showErrorOnUI(result.errorMessage);
-        print('Error while login: '+result.errorMessage);
+        print('Error while login: ' + result.errorMessage);
         break;
     }
   }
 
-  void _sendTokenToServer(String token) async{
-
-            final graphResponse = await http.get(
-            'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email&access_token=${token}');
-        print(graphResponse.body);
+  void _sendTokenToServer(String token) async {
+    final graphResponse = await http.get(
+        'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email&access_token=${token}');
+    print(graphResponse.body);
   }
 
   void _showLoggedInUI() {
     Navigator.of(context).pushReplacement(new MaterialPageRoute(
         builder: (context) => new MyHomePage(title: 'Okie')));
-
   }
-
 }
 
 class MyHomePage extends StatefulWidget {

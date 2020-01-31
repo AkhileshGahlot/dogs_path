@@ -25,3 +25,10 @@ const smallTextStyle= TextStyle(
     decoration: TextDecoration.none
 
 );
+const buttonTextStyle= TextStyle(
+    color:button2TextColor,
+    fontSize: 12,
+    fontFamily: 'LatoRegular',
+    decoration: TextDecoration.none
+
+);
