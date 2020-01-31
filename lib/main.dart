@@ -1,3 +1,4 @@
+import 'package:dogs_path/themes/colors.dart';
 import 'package:dogs_path/themes/textStyle.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home:Splash(),
+      home: LoginScreen(),
 //      MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
@@ -20,11 +21,10 @@ class MyApp extends StatelessWidget {
 
 class Splash extends StatefulWidget {
   @override
-  SplashState createState() => new SplashState();
+  _SplashState createState() => new _SplashState();
 }
 
-class SplashState extends State<Splash> {
-
+class _SplashState extends State<Splash> {
   @override
   void initState() {
     super.initState();
@@ -40,47 +40,139 @@ class SplashState extends State<Splash> {
   @override
   Widget build(BuildContext context) {
 
-    final orientation = MediaQuery.of(context).orientation;
-    final height= MediaQuery.of(context).size.height;
-    final width= MediaQuery.of(context).size.width;
+    return Container(
+      color: backgroundColor,
+      child: Column(
+        children: <Widget>[
+          Spacer(
+            flex: 4,
+          ),
 
-    return Stack(
-      children: <Widget>[
-        Positioned(
-          left: orientation==Orientation.portrait?width*.375:width*.44,
-          top: orientation==Orientation.portrait?height*.35:height*.12,
-          child: Container(
+          Container(
             constraints: BoxConstraints(
               maxHeight: 100,
               maxWidth: 100,
             ),
-            child: Image.asset('assets/gif/image.gif',
+            child: Image.asset(
+              'assets/gif/image.gif',
             ),
           ),
-        ),
-       Positioned(
-          left: orientation==Orientation.portrait?width*.18:width*.35,
-          top: orientation==Orientation.portrait?height*.5:height*.43,
-          child: Column(
-            children: <Widget>[
-              Text("Dog's Path",style: headingTextStyle,),
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
-                child: Text('by',
-                  style: smallTextStyle,
-                ),
-              ),
-              Text("VirtouStack Softwares Pvt. Ltd.",style: titleTextStyle,
-              ),
-            ],
+          SizedBox(
+             height: 20,
+           ),
+          Text(
+            "Dog's Path",
+            style: headingTextStyle,
           ),
-        ),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              'by',
+              style: smallTextStyle,
+            ),
+          ),
+          Text(
+            "VirtouStack Softwares Pvt. Ltd.",
+            style: titleTextStyle,
+          ),
+          Spacer(
+            flex: 5,
+          ),
 
-      ],
+        ],
+      ),
     );
+
   }
 }
 
+class LoginScreen extends StatefulWidget {
+  @override
+  _LoginScreenState createState() => new _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+
+    final orientation=MediaQuery.of(context).orientation;
+    final width=MediaQuery.of(context).size.width;
+    return Container(
+      color: backgroundColor,
+      child: Column(
+        children: <Widget>[
+          Spacer(
+            flex: 2,
+          ),
+
+          Padding(
+            padding: const EdgeInsets.only(bottom:8.0),
+            child: Text('Sign In',
+              style: headingTextStyle.copyWith(color: Colors.white,
+                fontSize: 22
+              ),),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(18.0),
+            child: Text(
+              'Sign in with your facebook account',
+              style: titleTextStyle.copyWith(color: Colors.white,fontSize: 14),
+                textAlign: TextAlign.center,
+            ),
+          ),
+
+          Container(
+            margin: orientation==Orientation.portrait?
+            EdgeInsets.symmetric(horizontal: 30)
+                :EdgeInsets.symmetric(horizontal: width*.3),
+            child: RaisedButton(
+              onPressed: (){},
+              color:  Color(0xFF3B5998),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                 Spacer(
+                   flex: 2,
+                 ),
+                  Text(
+                    'f',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Spacer(
+                    flex: 1,
+                  ),
+                  Text(
+                    'Sign in with Facebook',
+                    style:titleTextStyle
+                        .copyWith(fontFamily: 'LatoRegular',
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                    ),
+                  ),
+                  Spacer(
+                    flex: 4,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          Spacer(
+            flex: 2,
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
