@@ -1,6 +1,8 @@
 import 'package:dogs_path/themes/colors.dart';
 import 'package:dogs_path/themes/textStyle.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:http/http.dart' as http;
 
 void main() => runApp(MyApp());
 
@@ -13,10 +15,30 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: LoginScreen(),
+      home: HomePage(),
 //      MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
+}
+
+class HomePage extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return _HomePageState();
+  }
+
+}
+
+class _HomePageState extends State<HomePage>{
+
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return null;
+  }
+
 }
 
 class Splash extends StatefulWidget {
@@ -103,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Column(
         children: <Widget>[
           Spacer(
-            flex: 2,
+            flex: 4,
           ),
 
           Padding(
@@ -128,7 +150,9 @@ class _LoginScreenState extends State<LoginScreen> {
             EdgeInsets.symmetric(horizontal: 30)
                 :EdgeInsets.symmetric(horizontal: width*.3),
             child: RaisedButton(
-              onPressed: (){},
+              onPressed: (){
+                startFBLogin();
+              },
               color:  Color(0xFF3B5998),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -166,12 +190,53 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
 
           Spacer(
-            flex: 2,
+            flex: 5,
           ),
         ],
       ),
     );
   }
+
+
+  void startFBLogin() async{
+    final facebookLogin = FacebookLogin();
+    facebookLogin.loginBehavior = FacebookLoginBehavior.webViewOnly;
+    final result = await facebookLogin.logIn(['email']);
+
+    switch (result.status) {
+      case FacebookLoginStatus.loggedIn:
+
+      //todo: store access token in shared preference.
+//        _sendTokenToServer(result.accessToken.token);
+        _showLoggedInUI();
+
+        break;
+      case FacebookLoginStatus.cancelledByUser:
+      //        todo: add toast message
+      //        _showCancelledMessage();
+        print('User Cancele Login Process');
+        break;
+      case FacebookLoginStatus.error:
+//        todo: add toast message
+//        _showErrorOnUI(result.errorMessage);
+        print('Error while login: '+result.errorMessage);
+        break;
+    }
+  }
+
+  void _sendTokenToServer(String token) async{
+
+            final graphResponse = await http.get(
+            'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email&access_token=${token}');
+        print(graphResponse.body);
+  }
+
+  void _showLoggedInUI() {
+    Navigator.of(context).pushReplacement(new MaterialPageRoute(
+        builder: (context) => new MyHomePage(title: 'Okie')));
+
+  }
+
 }
 
 class MyHomePage extends StatefulWidget {
