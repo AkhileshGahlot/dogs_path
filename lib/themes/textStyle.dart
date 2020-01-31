@@ -12,7 +12,7 @@ const headingTextStyle= TextStyle(
 const titleTextStyle= TextStyle(
     color:headingColor,
     fontSize: 18,
-    fontFamily: 'LatoThin',
+    fontFamily: 'LatoLight',
 
     decoration: TextDecoration.none
 
