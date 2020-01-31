@@ -1,8 +1,14 @@
+import 'package:dogs_path/model/paths.dart';
 import 'package:dogs_path/themes/colors.dart';
 import 'package:dogs_path/themes/textStyle.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_widgets/flutter_widgets.dart';
+
 
 void main() => runApp(MyApp());
 
@@ -30,12 +36,24 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  List<Path> _pathList;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    _pathList = Path.convertJsonArray(json.decode(serverData));
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         centerTitle: true,
+        backgroundColor: backgroundColor,
         title: Text(
           "Dog's Path",
           style: titleTextStyle,
@@ -44,7 +62,9 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         child: Container(
           color: backgroundColor,
-          child: PrimaryListView(),
+          child: PrimaryListView(
+            pathList: _pathList,
+          ),
         ),
       ),
     );
@@ -53,6 +73,10 @@ class _HomePageState extends State<HomePage> {
 
 ///Vertical List View
 class PrimaryListView extends StatefulWidget {
+  final List<Path> pathList;
+
+  const PrimaryListView({Key key, this.pathList}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -65,31 +89,57 @@ class _PrimaryListViewState extends State<PrimaryListView> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return ListView.builder(
-      scrollDirection: Axis.vertical,
+      itemCount: widget.pathList.length - 1,
       itemBuilder: (context, index) {
-        return null;
+        print("indx: " + index.toString());
+        if (widget.pathList.length == 0) {
+          return Center(child: CircularProgressIndicator());
+        }
+        return SecondaryListCards(path: widget.pathList.elementAt(index));
       },
     );
   }
 }
 
-///Horizontal List View
-class SecondaryListView extends StatefulWidget {
+class SecondaryListCards extends StatefulWidget {
+  final Path path;
+
+  const SecondaryListCards({Key key, this.path}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return _SecondaryListViewState();
+    return _SecondaryListCards();
   }
 }
 
-class _SecondaryListViewState extends State<SecondaryListView> {
+class _SecondaryListCards extends State<SecondaryListCards> {
 
-  int isSelected=0;
+  ItemScrollController scrollController;
+  PageController pageController;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    scrollController=ItemScrollController();
+    pageController=PageController(initialPage: 0,keepPage: true);
+
+  }
+
+  @override
+  void didUpdateWidget(SecondaryListCards oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+  }
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Container(
+      height: 300,
+      constraints: BoxConstraints(maxHeight: 300),
       color: backgroundColor,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -100,48 +150,157 @@ class _SecondaryListViewState extends State<SecondaryListView> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.only(left:15.0),
+                padding: const EdgeInsets.only(left: 15.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                     Text("787878 Dach Crest",style: titleTextStyle,),
-                     Text("7 Sub Paths",style: smallTextStyle,),
+                    Text(
+                      widget.path.title != null
+                          ? widget.path.title
+                          : "NO TItle",
+                      style: titleTextStyle,
+                    ),
+                    Text(
+                      widget.path.subPaths.length != null
+                          ? "${widget.path.subPaths.length} SUb Paths"
+                          : "NO path",
+                      style: smallTextStyle,
+                    ),
                   ],
                 ),
               ),
               RaisedButton(
-                onPressed: (){},
+                onPressed: () {},
                 color: Colors.black,
-                child: Text('Open Path',style:buttonTextStyle,),
+                child: Text(
+                  'Open Path',
+                  style: buttonTextStyle,
+                ),
               ),
             ],
           ),
-          ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (context,index){
-                return Image.network('');
-              }
+          SecondaryListView(
+            subPaths: widget.path.subPaths,
+            scrollController: scrollController,
+            pageController: pageController,
           ),
-          Card(
-            elevation: 4,
-            child: ListView.builder(
+        ],
+      ),
+    );
+  }
+}
+
+///Horizontal List View
+class SecondaryListView extends StatefulWidget {
+  final List<SubPaths> subPaths;
+  final ItemScrollController scrollController;
+  final PageController pageController ;
+  SecondaryListView({@required this.subPaths, @required this.scrollController,@required this.pageController});
+
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return _SecondaryListViewState();
+  }
+}
+
+class _SecondaryListViewState extends State<SecondaryListView> {
+
+  int selectedPage = 0;
+  bool pageLock=true;
+
+  freePageLock(a){
+    pageLock=true;
+  }
+
+  selectedSubPath(int value, String caller){
+         if(caller=='text'){
+          setState(() {
+            pageLock = false;
+            selectedPage = value;
+            widget.pageController.animateToPage(
+                value, duration: Duration(seconds: 1), curve: Curves.easeInOut)
+                .then(freePageLock);
+          });
+      }else{
+           setState(() {
+             selectedPage =value;
+             widget.scrollController.scrollTo(index: value, duration: Duration(microseconds: 50),curve: Curves.easeInOut);
+           });
+         }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Flexible(
+      fit: FlexFit.loose,
+      child: Stack(
+        children: <Widget>[
+          PageView.builder(
+            onPageChanged: (int value){
+             if(pageLock)selectedSubPath(value, 'page');
+            },
+            controller: widget.pageController,
               scrollDirection: Axis.horizontal,
-              itemBuilder: (context,index) {
-                return ListTile(
-                  onTap: (){},
-                    enabled: true,
-                  title: Text('Cannnnnn',
-                  style: titleTextStyle.copyWith(
-                    color: isSelected==index?titleColor:button2TextColor,
-                  ),
-                  ),
-                  trailing: Icon(Icons.arrow_forward,
-                  color: titleColor,
-                  )
+              itemCount: widget.subPaths.length - 1,
+              itemBuilder: (context, index) {
+                return FadeInImage.assetNetwork(
+                  image: widget.subPaths.elementAt(index).image,
+                  width: MediaQuery.of(context).size.width,
+                  fit: BoxFit.fill,
+                  placeholder: "assets/gif/image.gif",
                 );
               }
-    ),
+              ),
+
+          Positioned.fill(
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: Container(
+                  constraints: BoxConstraints(
+                    maxHeight: 60,
+                  ),
+//                : RoundedRectangleBorder(
+//                    borderRadius: BorderRadius.circular(0.0)),
+                margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                color: Colors.black,
+//                elevation: 16,
+                child: ScrollablePositionedList.builder(
+                  itemScrollController:  widget.scrollController,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: widget.subPaths.length - 1,
+                    itemBuilder: (context, index) {
+                      return Row(
+                        children: <Widget>[
+                          GestureDetector(
+                            onTap: () {
+                              selectedSubPath(index, 'text');
+                            },
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20,vertical: 20),
+                              child:
+                                  Text(widget.subPaths.elementAt(index).title,
+                                      style: titleTextStyle.copyWith(
+                                        color: selectedPage == index
+                                            ? titleColor
+                                            : button2TextColor,
+                                      )),
+                            ),
+                          ),
+                          index!=widget.subPaths.length-2?
+                          Icon(
+                            Icons.arrow_forward,
+                            color: titleColor,
+                          )
+                              :SizedBox.shrink(),
+                        ],
+                      );
+                    }),
+              ),
+            ),
           ),
         ],
       ),
