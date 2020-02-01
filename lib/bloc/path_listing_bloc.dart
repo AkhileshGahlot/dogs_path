@@ -33,6 +33,8 @@ class PathListingBloc extends BlocStream {
 
     List<Path> itemModel = await _repository.fetchPaths();
 
+    /* call functions to manipulate list in your accordance.*/
+
     if(!_isDisposed)pathListSink.add(itemModel);
 
   }catch(error){
