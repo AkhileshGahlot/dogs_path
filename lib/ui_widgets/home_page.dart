@@ -158,8 +158,9 @@ class _HomePageState extends State<HomePage> {
                     pathList: snapshot.data,
                   );
                 }
-
-                return Center(child: CircularProgressIndicator(),);
+                return Center(child: CircularProgressIndicator(
+                  valueColor: new AlwaysStoppedAnimation<Color>(titleColor),
+                ),);
               }
           ),
         ),

@@ -36,7 +36,7 @@ class _SplashScreenState extends State<SplashScreenScreen> {
 
     //todo check for authentication
 
-    new Timer(new Duration(seconds: 1), () {
+    new Timer(new Duration(seconds: 3), () {
       checkFbToken();
     });
   }
