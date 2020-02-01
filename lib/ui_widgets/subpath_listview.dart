@@ -85,6 +85,7 @@ class _SecondaryListCards extends State<SecondaryListCards> {
     return Container(
       height: 300,
       color: backgroundColor,
+      padding: EdgeInsets.only(bottom: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.start,
@@ -229,11 +230,20 @@ class _SecondaryListViewState extends State<SecondaryListView> {
                 constraints: BoxConstraints(
                   maxHeight: 60,
                 ),
-//                : RoundedRectangleBorder(
-//                    borderRadius: BorderRadius.circular(0.0)),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      color: Colors.black,
+                      blurRadius: 10,
+                      
+                    ),
+                  ]
+
+                ),
+
                 margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                color: Colors.black,
-//                elevation: 16,
+
                 child: ScrollablePositionedList.builder(
                     itemScrollController: widget.scrollController,
                     scrollDirection: Axis.horizontal,
@@ -271,3 +281,4 @@ class _SecondaryListViewState extends State<SecondaryListView> {
     );
   }
 }
+
