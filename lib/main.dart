@@ -1,3 +1,4 @@
+import 'package:dogs_path/bloc/path_listing_bloc.dart';
 import 'package:dogs_path/model/paths.dart';
 import 'package:dogs_path/themes/colors.dart';
 import 'package:dogs_path/themes/textStyle.dart';
@@ -8,7 +9,6 @@ import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_widgets/flutter_widgets.dart';
-
 
 void main() => runApp(MyApp());
 
@@ -28,6 +28,10 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
+  final String fbToken;
+
+  const HomePage({Key key, this.fbToken}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -36,14 +40,69 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Path> _pathList;
+
+  PathListingBloc _listingBloc;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
-    _pathList = Path.convertJsonArray(json.decode(serverData));
+    _listingBloc = PathListingBloc()..fetchPaths();
+
+//    .convertJsonArray(json.decode(serverData));
+
+    if(widget.fbToken!=null)_sendTokenToServer(widget.fbToken);
+
+  }
+
+  @override
+  void dispose() {
+    _listingBloc.dispose();
+    // TODO: implement dispose
+    super.dispose();
+  }
+
+  void _sendTokenToServer(String token) async {
+    final graphResponse = await http.get(
+        'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email&access_token=${token}');
+    print(graphResponse.body);
+    _showAlert(context);
+    if (graphResponse.statusCode == 200) {
+      _showAlert(context);
+    }
+  }
+
+  void _showAlert(BuildContext context) {
+    showDialog(
+        context: context,
+
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            backgroundColor: Color(0xC3C3C5),
+            content: Container(
+              child: Column(
+                children: <Widget>[
+                  Text("Alert"),
+                  Text("Signed in as ${widget.fbToken}"),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Divider(
+                      height: 1,
+                    ),
+                  ),
+                  FlatButton(
+                    child: Text("OK"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  )
+                ],
+              ),
+            )));
   }
 
   @override
@@ -62,8 +121,18 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         child: Container(
           color: backgroundColor,
-          child: PrimaryListView(
-            pathList: _pathList,
+          child: StreamBuilder<List<Path>>(
+            stream: _listingBloc.pathListStream,
+            builder: (context,AsyncSnapshot<List<Path>> snapshot) {
+
+              if(snapshot.hasData){
+                return PrimaryListView(
+                  pathList: snapshot.data,
+                );
+              }
+
+              return Center(child: CircularProgressIndicator(),);
+            }
           ),
         ),
       ),
@@ -85,13 +154,25 @@ class PrimaryListView extends StatefulWidget {
 }
 
 class _PrimaryListViewState extends State<PrimaryListView> {
+
+  @override
+  void didUpdateWidget(PrimaryListView oldWidget) {
+
+    /** ON Occurrence of second Snapshot list Update the pathList
+      *  by first adding oldWidget(previous object) List
+      *  and then newWidget(new object) list.
+      *  final list =oldWidget.pathList;
+      *  list = list.add(pathList);
+     */
+    super.didUpdateWidget(oldWidget);
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return ListView.builder(
       itemCount: widget.pathList.length - 1,
       itemBuilder: (context, index) {
-        print("indx: " + index.toString());
         if (widget.pathList.length == 0) {
           return Center(child: CircularProgressIndicator());
         }
@@ -114,7 +195,6 @@ class SecondaryListCards extends StatefulWidget {
 }
 
 class _SecondaryListCards extends State<SecondaryListCards> {
-
   ItemScrollController scrollController;
   PageController pageController;
 
@@ -123,9 +203,8 @@ class _SecondaryListCards extends State<SecondaryListCards> {
     // TODO: implement initState
     super.initState();
 
-    scrollController=ItemScrollController();
-    pageController=PageController(initialPage: 0,keepPage: true);
-
+    scrollController = ItemScrollController();
+    pageController = PageController(initialPage: 0, keepPage: true);
   }
 
   @override
@@ -195,8 +274,11 @@ class _SecondaryListCards extends State<SecondaryListCards> {
 class SecondaryListView extends StatefulWidget {
   final List<SubPaths> subPaths;
   final ItemScrollController scrollController;
-  final PageController pageController ;
-  SecondaryListView({@required this.subPaths, @required this.scrollController,@required this.pageController});
+  final PageController pageController;
+  SecondaryListView(
+      {@required this.subPaths,
+      @required this.scrollController,
+      @required this.pageController});
 
   @override
   State<StatefulWidget> createState() {
@@ -206,43 +288,49 @@ class SecondaryListView extends StatefulWidget {
 }
 
 class _SecondaryListViewState extends State<SecondaryListView> {
-
   int selectedPage = 0;
-  bool pageLock=true;
+  bool pageLock = true;
 
-  freePageLock(a){
-    pageLock=true;
+  freePageLock(a) {
+    pageLock = true;
   }
 
-  selectedSubPath(int value, String caller){
-         if(caller=='text'){
-          setState(() {
-            pageLock = false;
-            selectedPage = value;
-            widget.pageController.animateToPage(
-                value, duration: Duration(seconds: 1), curve: Curves.easeInOut)
-                .then(freePageLock);
-          });
-      }else{
-           setState(() {
-             selectedPage =value;
-             widget.scrollController.scrollTo(index: value, duration: Duration(microseconds: 50),curve: Curves.easeInOut);
-           });
-         }
+  selectedSubPath(int value, String caller) {
+    print("called111");
+
+    if (caller == 'text') {
+
+      setState(() {
+        pageLock = false;
+        selectedPage = value;
+        widget.pageController
+            .animateToPage(value,
+                duration: Duration(seconds: 1), curve: Curves.easeInOut)
+            .then(freePageLock);
+      });
+    } else {
+     
+      setState(() {
+        selectedPage = value;
+        widget.scrollController.scrollTo(
+            index: value,
+            duration: Duration(microseconds: 50),
+            curve: Curves.easeInOut);
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Flexible(
       fit: FlexFit.loose,
       child: Stack(
         children: <Widget>[
           PageView.builder(
-            onPageChanged: (int value){
-             if(pageLock)selectedSubPath(value, 'page');
-            },
-            controller: widget.pageController,
+              onPageChanged: (int value) {
+                if (pageLock) selectedSubPath(value, 'page');
+              },
+              controller: widget.pageController,
               scrollDirection: Axis.horizontal,
               itemCount: widget.subPaths.length - 1,
               itemBuilder: (context, index) {
@@ -252,50 +340,44 @@ class _SecondaryListViewState extends State<SecondaryListView> {
                   fit: BoxFit.fill,
                   placeholder: "assets/gif/image.gif",
                 );
-              }
-              ),
-
+              }),
           Positioned.fill(
             child: Align(
               alignment: Alignment.bottomLeft,
               child: Container(
-                  constraints: BoxConstraints(
-                    maxHeight: 60,
-                  ),
+                constraints: BoxConstraints(
+                  maxHeight: 60,
+                ),
 //                : RoundedRectangleBorder(
 //                    borderRadius: BorderRadius.circular(0.0)),
                 margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
                 color: Colors.black,
 //                elevation: 16,
                 child: ScrollablePositionedList.builder(
-                  itemScrollController:  widget.scrollController,
+                    itemScrollController: widget.scrollController,
                     scrollDirection: Axis.horizontal,
                     itemCount: widget.subPaths.length - 1,
                     itemBuilder: (context, index) {
                       return Row(
                         children: <Widget>[
-                          GestureDetector(
-                            onTap: () {
+                          FlatButton(
+                            onPressed:(){
+
                               selectedSubPath(index, 'text');
                             },
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20,vertical: 20),
-                              child:
-                                  Text(widget.subPaths.elementAt(index).title,
-                                      style: titleTextStyle.copyWith(
-                                        color: selectedPage == index
-                                            ? titleColor
-                                            : button2TextColor,
-                                      )),
-                            ),
+                            child: Text(widget.subPaths.elementAt(index).title,
+                                style: titleTextStyle.copyWith(
+                                  color: selectedPage == index
+                                      ? titleColor
+                                      : button2TextColor,
+                                )),
                           ),
-                          index!=widget.subPaths.length-2?
-                          Icon(
-                            Icons.arrow_forward,
-                            color: titleColor,
-                          )
-                              :SizedBox.shrink(),
+                          index != widget.subPaths.length - 2
+                              ? Icon(
+                                  Icons.arrow_forward,
+                                  color: titleColor,
+                                )
+                              : SizedBox.shrink(),
                         ],
                       );
                     }),
@@ -467,7 +549,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         //todo: store access token in shared preference.
 //        _sendTokenToServer(result.accessToken.token);
-        _showLoggedInUI();
+        _showLoggedInUI(result.accessToken.token);
 
         break;
       case FacebookLoginStatus.cancelledByUser:
@@ -483,15 +565,15 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _sendTokenToServer(String token) async {
-    final graphResponse = await http.get(
-        'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email&access_token=${token}');
-    print(graphResponse.body);
-  }
+//  void _sendTokenToServer(String token) async {
+//    final graphResponse = await http.get(
+//        'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email&access_token=${token}');
+//    print(graphResponse.body);
+//  }
 
-  void _showLoggedInUI() {
+  void _showLoggedInUI(token) {
     Navigator.of(context).pushReplacement(new MaterialPageRoute(
-        builder: (context) => new MyHomePage(title: 'Okie')));
+        builder: (context) => new HomePage(fbToken: token)));
   }
 }
 
