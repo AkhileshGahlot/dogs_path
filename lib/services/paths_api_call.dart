@@ -4,7 +4,7 @@ import 'dart:convert';
 
 class PathApiProvider {
 
-  String baseUrl = "https://5d55541936ad770014ccdf2d.mockapi.io/api/v1/paths";
+  final String baseUrl = "https://5d55541936ad770014ccdf2d.mockapi.io/api/v1/paths";
  
 
   Future<List<Path>> fetchPaths() async {

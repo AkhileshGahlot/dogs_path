@@ -44,19 +44,20 @@ class _SplashScreenState extends State<SplashScreenScreen> {
 
   Future checkFbToken() async {
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+//    todo: fb login enable and check privacy policy on developer console
+//    SharedPreferences prefs = await SharedPreferences.getInstance();
 
     /* Store Your refresh and access token instead */
 
-    String fbToken = (prefs.get('fbToken') ?? null);
+//    String fbToken = (prefs.get('fbToken') ?? null);
 
-    if (fbToken!=null) {
+//    if (fbToken!=null) {
       Navigator.of(context).pushReplacement(new MaterialPageRoute(
           builder: (context) => new HomePage()));
-    } else {
-      Navigator.of(context).pushReplacement(
-          new MaterialPageRoute(builder: (context) => new LoginScreen()));
-    }
+//    } else {
+//      Navigator.of(context).pushReplacement(
+//          new MaterialPageRoute(builder: (context) => new LoginScreen()));
+//    }
   }
 
   @override
